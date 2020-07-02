@@ -9,9 +9,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class SiteController
 {
-    private $path;
-    private $request;
-    private $fetcher;
+    private string  $path;
+    private Request $request;
+    private ContentFetcher $fetcher;
+    private SaverService $saverService;
 
     public function __construct(
         Request $request,
@@ -29,6 +30,31 @@ class SiteController
         ]);
     }
 
+    private function getRemoteFile(string $domain, string $url): ?string
+    {
+        $url = ltrim($url, '/');
+        $url = $domain . '/' . $url;
+        $content = null;
+        $fetcher = $this->fetcher->fetch($url);
+
+        if (!$fetcher->hasError()) {
+            $content = $fetcher->getResponse();
+        }
+
+        return $content;
+    }
+
+    private function getCachedFile(string $filePath): ?string
+    {
+        $cacheFilePath = $this->path . DIRECTORY_SEPARATOR . ltrim($filePath, '/');
+
+        if (file_exists($cacheFilePath)) {
+            return file_get_contents($cacheFilePath);
+        }
+
+        return null;
+    }
+
     public function index()
     {
         $requestUri = $_SERVER['REQUEST_URI'];
@@ -37,29 +63,25 @@ class SiteController
             $requestUri = '/index.html';
         }
 
-        $cacheFilePath = $this->path . $requestUri;
+        $domains = [
+            'http://2oreha.by.tilda.ws',
+            'https://static.tildacdn.com',
+        ];
 
-        if (file_exists($cacheFilePath)) {
-            echo file_get_contents($cacheFilePath);
-            die();
+        $content = $this->getCachedFile($requestUri);
+
+        if (null === $content) {
+            foreach ($domains as $domain) {
+                $content = $this->getRemoteFile($domain, $requestUri);
+
+                if (null !== $content) {
+                    $requestUri = ltrim($requestUri, '/');
+                    $this->saverService->saveContent($requestUri, $content);
+                    break;
+                }
+            }
         }
 
-
-        $url = 'http://2oreha.by.tilda.ws' . $requestUri;
-        $fetcher = $this->fetcher->fetch($url);
-
-        if (!$fetcher->hasError()) {
-            $content = $fetcher->getResponse();
-            $this->saverService->saveContent(ltrim($requestUri, '/'), $content);
-        }
-
-
-        $url = 'https://static.tildacdn.com' . $requestUri;
-        $fetcher = $this->fetcher->fetch($url);
-
-        if (!$fetcher->hasError()) {
-            $content = $fetcher->getResponse();
-            $this->saverService->saveContent(ltrim($requestUri, '/'), $content);
-        }
+        echo $content;
     }
 }
