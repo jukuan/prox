@@ -33,7 +33,13 @@ class ContentFetcher
         $this->curl = $curl;
     }
 
-    public function fetch($url) {
+    public function hasError(): bool
+    {
+        return null !== $this->exception;
+    }
+
+    public function fetch($url)
+    {
         $curl = $this->curl;
         $curl->get($url);
 
@@ -99,6 +105,7 @@ class ContentFetcher
 
     public function getLinkedSources()
     {
+        $matches = [];
         $pattern = '/(data-original|href|src)=("[^"]*")/';
         preg_match_all($pattern, $this->response, $matches);
         $list = end($matches);

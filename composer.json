@@ -15,6 +15,7 @@
     "require": {
         "php-curl-class/php-curl-class": "^8.8",
         "vlucas/phpdotenv": "^5.0",
-        "php-di/php-di": "^6.2"
+        "php-di/php-di": "^6.2",
+        "symfony/http-foundation": "^5.1"
     }
 }

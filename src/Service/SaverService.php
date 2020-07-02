@@ -25,13 +25,11 @@ class SaverService
 
     public function __construct()
     {
-        $this->path = implode([
+        $this->path = implode(DIRECTORY_SEPARATOR, [
             APP_DIR,
             'cache',
             date('Y-m-d')
-        ],
-            DIRECTORY_SEPARATOR
-        );
+        ]);
 
         self::prepareDirectory(dirname($this->path));
     }
@@ -41,6 +39,10 @@ class SaverService
         $path = sprintf('%s%s%s', $this->path, DIRECTORY_SEPARATOR, $fileName);
 
         self::prepareDirectory(dirname($path));
+
+        if ($pos = strpos($path, '?')) {
+            $path = substr($path, 0, $pos);
+        }
 
         return $path;
     }

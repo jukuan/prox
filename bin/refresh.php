@@ -7,7 +7,7 @@ $cacheDir = $appDir . '/cache/app';
 require_once $appDir . '/vendor/autoload.php';
 
 $builder = new \DI\ContainerBuilder();
-$builder->addDefinitions('config/di-config.php');
+$builder->addDefinitions(APP_DIR . '/config/di-config.php');
 $isProduction = false;
 
 if ($isProduction) {
