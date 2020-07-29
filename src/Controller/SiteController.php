@@ -48,6 +48,17 @@ class SiteController
         }
 
         if (file_exists($cacheFilePath)) {
+            $path_parts = pathinfo($cacheFilePath);
+            $extension = $path_parts['extension'];
+
+            if ('css' === $extension) {
+                header("Content-Type: text/css");
+                header("X-Content-Type-Options: nosniff");
+            } else if ('js' === $extension) {
+                header("Content-Type: application/javascript");
+                header("Cache-Control: max-age=604800, public");
+            }
+
             echo file_get_contents($cacheFilePath);
             die();
         }
@@ -56,19 +67,19 @@ class SiteController
         $content = '-0-';
         $requestUri = ltrim($requestUri, '/');
 
-        $url = 'http://2oreha.by.tilda.ws/' . $requestUri;
-        $fetcher = $this->fetcher->fetch($url);
+        $sourceServers = [
+            'http://2oreha.by.tilda.ws/',
+            'https://static.tildacdn.com/',
+        ];
 
-        if (!$fetcher->hasError()) {
-            $content = $fetcher->getResponse();
-            $this->saverService->saveContent($requestUri, $content);
-        } else {
-            $url = 'https://static.tildacdn.com/' . $requestUri;
+        foreach ($sourceServers as $domain) {
+            $url = $domain . $requestUri;
             $fetcher = $this->fetcher->fetch($url);
 
             if (!$fetcher->hasError()) {
                 $content = $fetcher->getResponse();
                 $this->saverService->saveContent($requestUri, $content);
+                break;
             }
         }
 
