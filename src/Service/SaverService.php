@@ -49,12 +49,22 @@ class SaverService
 
     public function saveContent($name, $content)
     {
+        if ('/' === $name || empty($name)) {
+            $name = 'index.html';
+        }
+
         if (count($this->domainReplacings) > 0) {
             $content = str_replace($this->domainReplacings, '', $content);
         }
 
+        $filePath = $this->getPath($name);
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
         try {
-            file_put_contents($this->getPath($name), $content);
+            file_put_contents($filePath, $content);
         } catch (\Exception $exception) {
             $this->exception = $exception;
         }
