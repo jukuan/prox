@@ -57,6 +57,13 @@ class SiteController
             } else if ('js' === $extension) {
                 header("Content-Type: application/javascript");
                 header("Cache-Control: max-age=604800, public");
+            } else if (in_array($extension, ['png', 'jpg', 'jpeg', 'gif'])) {
+                if ('jpg' === $extension) {
+                    $extension = 'jpeg';
+                }
+                $type = 'image/' . $extension;
+                header('Content-Type:'.$type);
+                header('Content-Length: ' . filesize($cacheFilePath));
             }
 
             echo file_get_contents($cacheFilePath);
@@ -64,12 +71,12 @@ class SiteController
         }
 
 
-        $content = '-0-';
+        $content = '';
         $requestUri = ltrim($requestUri, '/');
 
         $sourceServers = [
-            'http://2oreha.by.tilda.ws/',
             'https://static.tildacdn.com/',
+            'http://2oreha.by.tilda.ws/',
         ];
 
         foreach ($sourceServers as $domain) {
@@ -83,6 +90,10 @@ class SiteController
             }
         }
 
-        echo $content;
+        if ($content) {
+            echo $content;
+        } else {
+            header('HTTP/1.0 404 Not Found');
+        }
     }
 }
