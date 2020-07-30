@@ -9,9 +9,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class SiteController
 {
-    private $path;
-    private $request;
-    private $fetcher;
+    private string  $path;
+    private Request $request;
+    private ContentFetcher $fetcher;
+    private SaverService $saverService;
 
     public function __construct(
         Request $request,
@@ -27,6 +28,31 @@ class SiteController
             'cache',
             date('Y-m-d')
         ]);
+    }
+
+    private function getRemoteFile(string $domain, string $url): ?string
+    {
+        $url = ltrim($url, '/');
+        $url = $domain . '/' . $url;
+        $content = null;
+        $fetcher = $this->fetcher->fetch($url);
+
+        if (!$fetcher->hasError()) {
+            $content = $fetcher->getResponse();
+        }
+
+        return $content;
+    }
+
+    private function getCachedFile(string $filePath): ?string
+    {
+        $cacheFilePath = $this->path . DIRECTORY_SEPARATOR . ltrim($filePath, '/');
+
+        if (file_exists($cacheFilePath)) {
+            return file_get_contents($cacheFilePath);
+        }
+
+        return null;
     }
 
     public function index()
@@ -82,8 +108,10 @@ class SiteController
         foreach ($sourceServers as $domain) {
             $url = $domain . $requestUri;
             $fetcher = $this->fetcher->fetch($url);
+//            $content = $this->getRemoteFile($domain, $requestUri);
 
             if (!$fetcher->hasError()) {
+//                if (null !== $content) {
                 $content = $fetcher->getResponse();
                 $this->saverService->saveContent($requestUri, $content);
                 break;
