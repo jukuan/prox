@@ -71,6 +71,7 @@ class ContentFetcher
             'facebook.com',
             'twitter.com',
             'google.com',
+            'googleapis.com',
             '//tilda.ws',
             '//tilda.cc',
         ];

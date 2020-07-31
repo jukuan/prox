@@ -101,18 +101,14 @@ class SiteController
         $requestUri = ltrim($requestUri, '/');
 
         $sourceServers = [
-            'https://static.tildacdn.com/',
             'http://2oreha.by.tilda.ws/',
+            'https://static.tildacdn.com/',
         ];
 
         foreach ($sourceServers as $domain) {
-            $url = $domain . $requestUri;
-            $fetcher = $this->fetcher->fetch($url);
-//            $content = $this->getRemoteFile($domain, $requestUri);
+            $content = $this->getRemoteFile($domain, $requestUri);
 
-            if (!$fetcher->hasError()) {
-//                if (null !== $content) {
-                $content = $fetcher->getResponse();
+            if (null !== $content) {
                 $this->saverService->saveContent($requestUri, $content);
                 break;
             }
