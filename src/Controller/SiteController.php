@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Service\ContentFetcher;
+use App\Service\HtmlOutputTransformer;
+use App\Service\DotEnvService;
 use App\Service\SaverService;
 use Curl\Curl;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,15 +15,21 @@ class SiteController
     private Request $request;
     private ContentFetcher $fetcher;
     private SaverService $saverService;
+    private DotEnvService $dotEnvService;
+    private HtmlOutputTransformer $htmlOutput;
 
     public function __construct(
+        DotEnvService $dotEnvService,
         Request $request,
         ContentFetcher $fetcher,
-        SaverService $saverService
+        SaverService $saverService,
+        HtmlOutputTransformer $htmlOutputTransformer
     ) {
         $this->request = $request;
         $this->fetcher = $fetcher;
         $this->saverService = $saverService;
+        $this->dotEnvService = $dotEnvService;
+        $this->htmlOutput = $htmlOutputTransformer;
 
         $this->path = implode(DIRECTORY_SEPARATOR, [
             APP_DIR,
@@ -92,7 +100,13 @@ class SiteController
                 header('Content-Length: ' . filesize($cacheFilePath));
             }
 
-            echo file_get_contents($cacheFilePath);
+            $output = file_get_contents($cacheFilePath);
+
+            if ($this->htmlOutput::isHtml($output)) {
+                $output = $this->htmlOutput->prepare($output);
+            }
+
+            echo $output;
             die();
         }
 
@@ -100,12 +114,7 @@ class SiteController
         $content = '';
         $requestUri = ltrim($requestUri, '/');
 
-        $sourceServers = [
-            'http://2oreha.by.tilda.ws/',
-            'https://static.tildacdn.com/',
-        ];
-
-        foreach ($sourceServers as $domain) {
+        foreach ($this->dotEnvService->getSourceServers() as $domain) {
             $content = $this->getRemoteFile($domain, $requestUri);
 
             if (null !== $content) {

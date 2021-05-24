@@ -6,7 +6,7 @@ use Dotenv\Dotenv;
 
 class DotEnvService
 {
-    private static $variables = [];
+    private static array $variables = [];
 
     public function __construct()
     {
@@ -18,13 +18,37 @@ class DotEnvService
         }
     }
 
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         return self::$variables[$key] ?? $default;
     }
 
     public function getSiteSource(): string
     {
-        return $this->get('SITE_SOURCE');
+        $source = $this->get('SITE_SOURCE');
+
+        if (!$source) {
+            throw new \DomainException('Source site is not defined');
+        }
+
+        return $source;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getSourceServers(): array
+    {
+        $source = $this->getSiteSource();
+
+        return explode(';', $source);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getReplacedDomains(): array
+    {
+        return [];
     }
 }

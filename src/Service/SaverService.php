@@ -4,32 +4,45 @@ namespace App\Service;
 
 class SaverService
 {
-    private $path;
+    private string $path;
 
     /**
-     * @var \Exception
+     * @var \Exception|null
      */
-    private $exception;
+    private $exception = null;
 
     /**
      * @var array
      */
-    private $domainReplacings = [];
+    private array $domainReplacing = [];
 
     private static function prepareDirectory(string $dir)
     {
+        $parentDir = dirname($dir);
+        $upParentDir = dirname($parentDir);
+
+        if (!file_exists($upParentDir)) {
+            mkdir($upParentDir, 0755, true);
+        }
+
+        if (!file_exists($parentDir)) {
+            mkdir($parentDir, 0755, true);
+        }
+
         if (!file_exists($dir)) {
             mkdir($dir, 0755, true);
         }
     }
 
-    public function __construct()
+    public function __construct(DotEnvService $dotEnvService)
     {
         $this->path = implode(DIRECTORY_SEPARATOR, [
             APP_DIR,
             'cache',
             date('Y-m-d')
         ]);
+
+        $this->domainReplacing = $dotEnvService->getSourceServers();
 
         self::prepareDirectory(dirname($this->path));
     }
@@ -39,9 +52,16 @@ class SaverService
         $path = sprintf('%s%s%s', $this->path, DIRECTORY_SEPARATOR, $fileName);
 
         self::prepareDirectory(dirname($path));
+        self::prepareDirectory($path);
 
         if ($pos = strpos($path, '?')) {
             $path = substr($path, 0, $pos);
+        }
+
+        $lastCh = substr($path, -1);
+
+        if ('/' === $lastCh) {
+            $path .= 'index.html';
         }
 
         return $path;
@@ -53,13 +73,13 @@ class SaverService
             $name = 'index.html';
         }
 
-        if (count($this->domainReplacings) > 0) {
-            $content = str_replace($this->domainReplacings, '', $content);
+        if (count($this->domainReplacing) > 0) {
+            $content = str_replace($this->domainReplacing, '', $content);
         }
 
         $filePath = $this->getPath($name);
 
-        if (file_exists($filePath)) {
+        if (file_exists($filePath) && is_file($filePath)) {
             unlink($filePath);
         }
 
@@ -73,7 +93,7 @@ class SaverService
     public function reset()
     {
         $this->exception = null;
-        $this->domainReplacings = [];
+        $this->domainReplacing = [];
 
         return $this;
     }
@@ -96,7 +116,7 @@ class SaverService
         }, $list);
 
         $list = array_unique($list);
-        $this->domainReplacings = array_filter($list);
+        $this->domainReplacing = array_filter($list);
 
         return $this;
     }
