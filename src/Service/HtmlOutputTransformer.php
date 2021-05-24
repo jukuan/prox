@@ -40,6 +40,8 @@ class HtmlOutputTransformer
             'https://www.%s' => '',
             'https://%s/' => '/',
             'https://%s' => '',
+
+            '/index.php/' => '/',
         ];
 
         foreach ($this->dotEnvService->getSourceServers() as $domain) {

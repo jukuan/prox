@@ -19,14 +19,14 @@ class FetcherFactory
     /**
      * @var ContentFetcher
      */
-    private $contentFetcher;
+    private ContentFetcher $contentFetcher;
 
     /**
      * @var SaverService
      */
-    private $saverService;
+    private SaverService $saverService;
 
-    private static function prepareUrl(string $domain)
+    private static function prepareUrl(string $domain): string
     {
         $domain = trim($domain);
         $domain = rtrim($domain, '/');
@@ -48,7 +48,7 @@ class FetcherFactory
         );
     }
 
-    private function prepareSourceUrl($url)
+    private function prepareSourceUrl($url): string
     {
         $url = trim($url);
         $url = trim($url, '/');
@@ -67,7 +67,7 @@ class FetcherFactory
         return $url;
     }
 
-    private function migrate($url, $filename = null)
+    private function migrate($url, $filename = null): ?ContentFetcher
     {
         echo sprintf('!Migrate: %s', $url) . PHP_EOL;
 

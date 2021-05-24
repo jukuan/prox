@@ -26,7 +26,7 @@ class ContentFetcher
     /**
      * @var Exception|null
      */
-    private $exception;
+    private ?Exception $exception = null;
 
     public function __construct(Curl $curl)
     {
@@ -38,7 +38,7 @@ class ContentFetcher
         return null !== $this->exception;
     }
 
-    public function fetch($url)
+    public function fetch($url): ContentFetcher
     {
         $curl = $this->curl;
         $curl->get($url);
@@ -57,7 +57,6 @@ class ContentFetcher
 
         return $this;
     }
-
 
     public function getResponse()
     {
@@ -85,7 +84,7 @@ class ContentFetcher
         return false;
     }
 
-    private function filterSources(array $list)
+    private function filterSources(array $list): array
     {
         return array_filter($list, function (string $resource) {
             $resource = trim($resource, '"');
@@ -104,7 +103,7 @@ class ContentFetcher
         });
     }
 
-    public function getLinkedSources()
+    public function getLinkedSources(): array
     {
         $matches = [];
         $pattern = '/(data-original|href|src)=("[^"]*")/';
