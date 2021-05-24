@@ -124,6 +124,10 @@ class SiteController
         }
 
         if ($content) {
+            if ($this->htmlOutput::isHtml($content)) {
+                $content = $this->htmlOutput->prepare($content);
+            }
+
             echo $content;
         } else {
             header('HTTP/1.0 404 Not Found');
