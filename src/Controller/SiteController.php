@@ -82,24 +82,7 @@ class SiteController
         }
 
         if (file_exists($cacheFilePath)) {
-            $path_parts = pathinfo($cacheFilePath);
-            $extension = $path_parts['extension'];
-
-            if ('css' === $extension) {
-                header("Content-Type: text/css");
-                header("X-Content-Type-Options: nosniff");
-            } else if ('js' === $extension) {
-                header("Content-Type: application/javascript");
-                header("Cache-Control: max-age=604800, public");
-            } else if (in_array($extension, ['png', 'jpg', 'jpeg', 'gif'])) {
-                if ('jpg' === $extension) {
-                    $extension = 'jpeg';
-                }
-                $type = 'image/' . $extension;
-                header('Content-Type:'.$type);
-                header('Content-Length: ' . filesize($cacheFilePath));
-            }
-
+            $this->handleFileTypeExtension($cacheFilePath);
             $output = file_get_contents($cacheFilePath);
 
             if ($this->htmlOutput::isHtml($output)) {
@@ -124,6 +107,8 @@ class SiteController
         }
 
         if ($content) {
+            $this->handleFileTypeExtension($cacheFilePath);
+
             if ($this->htmlOutput::isHtml($content)) {
                 $content = $this->htmlOutput->prepare($content);
             }
@@ -131,6 +116,29 @@ class SiteController
             echo $content;
         } else {
             header('HTTP/1.0 404 Not Found');
+        }
+    }
+
+    private function handleFileTypeExtension(string $filePath): void
+    {
+        $path_parts = pathinfo($filePath);
+        $extension = $path_parts['extension'];
+
+        if ('css' === $extension) {
+            header("Content-Type: text/css");
+            header("X-Content-Type-Options: nosniff");
+        } else if ('js' === $extension) {
+            header("Content-Type: application/javascript");
+            header("Cache-Control: max-age=604800, public");
+        } else if (in_array($extension, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'])) {
+            if ('jpg' === $extension) {
+                $extension = 'jpeg';
+            }
+            $type = 'image/' . $extension;
+            header('Content-Type:'.$type);
+            header('Content-Length: ' . filesize($filePath));
+        } else if (in_array($extension, ['html', 'html'], true)) {
+            header("Content-Type: text/html");
         }
     }
 }
