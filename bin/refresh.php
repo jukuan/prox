@@ -6,19 +6,7 @@ $cacheDir = $appDir . '/cache/app';
 
 require_once $appDir . '/vendor/autoload.php';
 
-$builder = new \DI\ContainerBuilder();
-$builder->addDefinitions(APP_DIR . '/config/di-config.php');
-$isProduction = false;
-
-if ($isProduction) {
-    $builder->enableCompilation($cacheDir);
-    $builder->writeProxiesToFile(true, $cacheDir . '/proxies');
-    $builder->ignorePhpDocErrors(true);
-}
-
-$container = $builder->build();
-
-
+$container = buildContainer($cacheDir);
 $container->call(function(\App\Command\RefreshCommand $command) {
     $command->run();
 });

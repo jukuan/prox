@@ -122,7 +122,7 @@ class SiteController
     private function handleFileTypeExtension(string $filePath): void
     {
         $path_parts = pathinfo($filePath);
-        $extension = $path_parts['extension'];
+        $extension = $path_parts['extension'] ?? 'html';
 
         if ('css' === $extension) {
             header("Content-Type: text/css");
