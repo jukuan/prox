@@ -9,7 +9,7 @@ class SaverService
     /**
      * @var \Exception|null
      */
-    private $exception = null;
+    private ?\Exception $exception = null;
 
     /**
      * @var array
@@ -51,9 +51,6 @@ class SaverService
     {
         $path = sprintf('%s%s%s', $this->path, DIRECTORY_SEPARATOR, $fileName);
 
-        self::prepareDirectory(dirname($path));
-        self::prepareDirectory($path);
-
         if ($pos = strpos($path, '?')) {
             $path = substr($path, 0, $pos);
         }
@@ -63,6 +60,8 @@ class SaverService
         if ('/' === $lastCh) {
             $path .= 'index.html';
         }
+
+        self::prepareDirectory(dirname($path));
 
         return $path;
     }
@@ -90,7 +89,17 @@ class SaverService
         }
     }
 
-    public function reset()
+    public function hasError(): bool
+    {
+        return null !== $this->exception;
+    }
+
+    public function getError(): ?string
+    {
+        return null !== $this->exception ? $this->exception->getMessage() : null;
+    }
+
+    public function reset(): SaverService
     {
         $this->exception = null;
         $this->domainReplacing = [];
@@ -98,7 +107,7 @@ class SaverService
         return $this;
     }
 
-    public function useReplacingFor(array $list)
+    public function useReplacingFor(array $list): SaverService
     {
         $list = array_map(function ($url) {
             $url = trim($url, '"');
