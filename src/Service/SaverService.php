@@ -36,11 +36,7 @@ class SaverService
 
     public function __construct(DotEnvService $dotEnvService)
     {
-        $this->path = implode(DIRECTORY_SEPARATOR, [
-            APP_DIR,
-            'cache',
-            date('Y-m-d')
-        ]);
+        $this->path = getHtmlCachePath();
 
         $this->domainReplacing = $dotEnvService->getSourceServers();
 

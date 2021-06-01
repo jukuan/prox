@@ -31,11 +31,7 @@ class SiteController
         $this->dotEnvService = $dotEnvService;
         $this->htmlOutput = $htmlOutputTransformer;
 
-        $this->path = implode(DIRECTORY_SEPARATOR, [
-            APP_DIR,
-            'cache',
-            date('Y-m-d')
-        ]);
+        $this->path = getHtmlCachePath();
     }
 
     private function getRemoteFile(string $domain, string $url): ?string
@@ -83,13 +79,13 @@ class SiteController
 
         if (file_exists($cacheFilePath)) {
             $this->handleFileTypeExtension($cacheFilePath);
-            $output = file_get_contents($cacheFilePath);
+            $content = file_get_contents($cacheFilePath);
 
-            if ($this->htmlOutput::isHtml($output)) {
-                $output = $this->htmlOutput->prepare($output);
+            if ($this->htmlOutput::isHtml($content)) {
+                $content = $this->htmlOutput->prepare($content);
             }
 
-            echo $output;
+            echo $content;
             die();
         }
 

@@ -1,7 +1,7 @@
 <?php
 
 $appDir = dirname(__DIR__);
-define('APP_DIR', $appDir);
+defined('APP_DIR') || define('APP_DIR', $appDir);
 $cacheDir = $appDir . '/cache/app';
 
 require_once $appDir . '/vendor/autoload.php';

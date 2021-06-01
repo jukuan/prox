@@ -42,6 +42,13 @@ class HtmlOutputTransformer
             'https://%s' => '',
 
             '/index.php/' => '/',
+            '/index.html' => '/',
+            '/index.htm' => '/',
+
+            '<script type="text/javascript"' => '<script',
+            '<style type="text/css"' => '<style',
+            'color: .#' => 'color: #',
+            '&copy ' => '&copy; ',
         ];
 
         foreach ($this->dotEnvService->getSourceServers() as $domain) {
