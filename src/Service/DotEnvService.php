@@ -23,15 +23,9 @@ class DotEnvService
         return self::$variables[$key] ?? $default;
     }
 
-    public function getSiteSource(): string
+    public function getSiteSource(): ?string
     {
-        $source = $this->get('SITE_SOURCE');
-
-        if (!$source) {
-            throw new \DomainException('Source site is not defined');
-        }
-
-        return $source;
+        return $this->get('SITE_SOURCE');
     }
 
     /**
@@ -39,9 +33,27 @@ class DotEnvService
      */
     public function getSourceServers(): array
     {
-        $source = $this->getSiteSource();
+        $source = $this->getSiteSource() || '';
+
+        if (0 === strlen($source)) {
+            return [];
+        }
 
         return explode(';', $source);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSourceServer(): bool
+    {
+        $source = $this->getSiteSource() || '';
+
+        if (strlen($source) > 0) {
+            return count($this->getSourceServers()) > 0;
+        }
+
+        return false;
     }
 
     /**

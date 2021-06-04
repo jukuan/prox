@@ -91,18 +91,21 @@ class SiteController
 
 
         $content = '';
-        $requestUri = ltrim($requestUri, '/');
 
-        foreach ($this->dotEnvService->getSourceServers() as $domain) {
-            $content = $this->getRemoteFile($domain, $requestUri);
+        if ($this->dotEnvService->hasSourceServer()) {
+            $requestUri = ltrim($requestUri, '/');
 
-            if (null !== $content) {
-                $this->saverService->saveContent($requestUri, $content);
-                break;
+            foreach ($this->dotEnvService->getSourceServers() as $domain) {
+                $content = $this->getRemoteFile($domain, $requestUri);
+
+                if (null !== $content) {
+                    $this->saverService->saveContent($requestUri, $content);
+                    break;
+                }
             }
         }
 
-        if ($content) {
+        if ($content && strlen($content) > 0) {
             $this->handleFileTypeExtension($cacheFilePath);
 
             if ($this->htmlOutput::isHtml($content)) {
@@ -111,6 +114,7 @@ class SiteController
 
             echo $content;
         } else {
+            // TODO: output for 404 error
             header('HTTP/1.0 404 Not Found');
         }
     }
