@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+if (file_exists(APP_DIR . '/config/di-config.php')) {
+    require_once APP_DIR . '/config/config-local.php';
+}
+
 defined('APP_DIR') || define('APP_DIR', dirname(__DIR__));
 
 if ( ! function_exists('dd')) {
