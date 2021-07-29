@@ -71,6 +71,7 @@ class ContentFetcher
             'twitter.com',
             'google.com',
             'googleapis.com',
+            'megogo.net',
             '//tilda.ws',
             '//tilda.cc',
         ];
@@ -106,9 +107,13 @@ class ContentFetcher
     public function getLinkedSources(): array
     {
         $matches = [];
-        $pattern = '/(data-original|href|src)=("[^"]*")/';
-        preg_match_all($pattern, $this->response, $matches);
-        $list = end($matches);
+
+        if (is_string($this->response) && strlen($this->response) > 0) {
+            $pattern = '/(data-original|href|src)=("[^"]*")/';
+            preg_match_all($pattern, $this->response, $matches);
+        }
+
+        $list = (array) end($matches);
 
         return $this->filterSources($list);
     }
